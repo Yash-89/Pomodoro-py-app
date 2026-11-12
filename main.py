@@ -4,7 +4,9 @@ from pathlib import Path
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#f27d85"
 RED = "#e7305b"
+DARK_RED = "#990000"
 GREEN = "#00aa00"
+DARK_GREEN = "#006600"
 GREY = "#555555"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
@@ -93,10 +95,10 @@ canvas.create_image(100, 112, image=tomato_img)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
 canvas.grid(column=1, row=1)
 
-start_button = Button(text="Start", command=is_timer_running, width=10, bg=YELLOW, fg="#000", highlightthickness=0)
+start_button = Button(text="Start", command=is_timer_running, width=10, bg=YELLOW, fg=DARK_GREEN, highlightthickness=0)
 start_button.grid(column=0, row=2)
 
-reset_button = Button(text="Reset", command=reset_timer, width=10, bg=YELLOW, fg=RED, highlightthickness=0)
+reset_button = Button(text="Reset", command=reset_timer, width=10, bg=YELLOW, fg=DARK_RED, highlightthickness=0)
 reset_button.grid(column=2, row=2)
 
 check_mark = Label(fg=GREEN, bg=YELLOW, highlightthickness=0)
