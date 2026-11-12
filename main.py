@@ -1,4 +1,6 @@
 from tkinter import *
+from pathlib import Path
+
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#f27d85"
 RED = "#e7305b"
@@ -9,6 +11,8 @@ FONT_NAME = "Courier"
 WORK_MIN = 35
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 15
+BASE_DIR = Path(__file__).resolve().parent
+TOMATO_IMG_DIR = BASE_DIR / "res" / "tomato.png"
 reps = 0
 flag = False
 timer = None
@@ -77,13 +81,14 @@ def count_down(count):
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
 window.title("Pomodoro")
+tomato_img = PhotoImage(file=TOMATO_IMG_DIR)
+window.iconphoto(True, tomato_img)
 window.config(padx=100, pady=50, bg=YELLOW)
 
 title_label = Label(text="Timer", fg=GREY, bg=YELLOW, font=(FONT_NAME, 48))
 title_label.grid(column=1, row=0)
 
 canvas = Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
-tomato_img = PhotoImage(file="res/tomato.png")
 canvas.create_image(100, 112, image=tomato_img)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
 canvas.grid(column=1, row=1)
