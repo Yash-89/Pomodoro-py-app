@@ -11,14 +11,15 @@ DARK_GREEN = "#006600"
 GREY = "#444444"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 25
-SHORT_BREAK_MIN = 5
-LONG_BREAK_MIN = 15
+WORK_MIN = 0.2
+SHORT_BREAK_MIN = 0.1
+LONG_BREAK_MIN = 0.15
 BASE_DIR = Path(__file__).resolve().parent
 TOMATO_IMG_DIR = BASE_DIR / "res" / "tomato.png"
 reps = 0
 is_active = False
 is_paused = False
+is_reset = True
 timer = None
 next_tick = None
 rem_ms = 0
@@ -26,16 +27,34 @@ cnt = 0
 
 # ---------------------------- TIMER RESET ------------------------------- # 
 def reset_timer():
-    global timer, reps, is_active, is_paused
+    global timer, reps, is_active, is_paused, is_reset
 
-    reps = 0
     is_active = False
     is_paused = False
+
+    if not is_reset:
+        window.after_cancel(timer)
+        if reps % 8 == 0:
+            txt = f"{LONG_BREAK_MIN if LONG_BREAK_MIN >= 10 else f"0{LONG_BREAK_MIN}"}:00"
+        elif reps % 2 == 0:
+            txt = f"{SHORT_BREAK_MIN if SHORT_BREAK_MIN >= 10 else f"0{SHORT_BREAK_MIN}"}:00"
+        else:
+            txt = f"{WORK_MIN if WORK_MIN >= 10 else f"0{WORK_MIN}"}:00"
+        canvas.itemconfig(timer_text, text=txt)
+        timer_controller.configure(text="Start", command=is_timer_running, fg=DARK_GREEN)
+        reset_button.configure(text="Reset")
+        reps -= 1
+        is_reset = True
+        
+        return
+
+    reps = 0
     title_label.config(text="Timer", fg=GREY)
     if timer is not None:
         window.after_cancel(timer)
         timer = None
         timer_controller.configure(text="Start", command=is_timer_running, fg=DARK_GREEN)
+        reset_button.configure(text="Reset")
         canvas.itemconfig(timer_text, text="00:00")
         check_mark.config(text="")
 
@@ -56,17 +75,20 @@ def pause_resume():
 
 # ---------------------------- TIMER STATUS CHECK ------------------------------- #
 def is_timer_running():
-    global is_active
+    global is_active, is_reset
 
     if not is_active:
         is_active = True
         timer_controller.configure(text="Pause", command=pause_resume, fg=GREY)
+        if is_reset:
+            reset_button.configure(text="Restart")
         start_timer()
 
 # ---------------------------- START MECHANISM ------------------------------- # 
 def start_timer():
-    global reps
+    global reps, is_reset
 
+    is_reset = False
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
     long_break_sec = LONG_BREAK_MIN * 60
