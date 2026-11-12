@@ -1,5 +1,6 @@
 from tkinter import *
 from pathlib import Path
+from pygame import mixer
 import time
 
 # ---------------------------- CONSTANTS ------------------------------- #
@@ -15,7 +16,8 @@ WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 15
 BASE_DIR = Path(__file__).resolve().parent
-TOMATO_IMG_DIR = BASE_DIR / "res" / "tomato.png"
+RES_DIR = BASE_DIR / "res"
+# TOMATO_IMG_DIR = RES_DIR / "tomato.png"
 reps = 0
 is_active = False
 is_paused = False
@@ -24,6 +26,17 @@ timer = None
 next_tick = None
 rem_ms = 0
 cnt = 0
+
+# ------------------------ NOTIFICATIONS SETUP --------------------------- #
+mixer.init()
+
+work_end = mixer.Sound(
+    RES_DIR / "WorkEnd.wav"
+)
+
+break_end = mixer.Sound(
+    RES_DIR / "BreakEnd.wav"
+)
 
 # ---------------------------- TIMER RESET ------------------------------- # 
 def reset_timer():
@@ -95,12 +108,15 @@ def start_timer():
     reps += 1
 
     if reps % 8 == 0:
+        work_end.play(loops=1)
         title_label.config(text="Long Break", fg=RED)
         count_down(long_break_sec)
     elif reps % 2 == 0:
+        work_end.play()
         title_label.config(text="Break", fg=PINK)
         count_down(short_break_sec)
     else:
+        break_end.play()
         title_label.config(text="Work", fg=GREEN)
         count_down(work_sec)
 
@@ -131,7 +147,8 @@ def count_down(count):
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
 window.title("Pomodoro")
-tomato_img = PhotoImage(file=TOMATO_IMG_DIR)
+# tomato_img = PhotoImage(file=TOMATO_IMG_DIR)
+tomato_img = PhotoImage(file=RES_DIR / "tomato.png")
 window.iconphoto(True, tomato_img)
 window.config(padx=100, pady=50, bg=YELLOW)
 
