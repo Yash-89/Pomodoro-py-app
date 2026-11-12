@@ -1,5 +1,6 @@
 from tkinter import *
 from pathlib import Path
+import time
 
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#f27d85"
@@ -7,41 +8,64 @@ RED = "#e7305b"
 DARK_RED = "#990000"
 GREEN = "#00aa00"
 DARK_GREEN = "#006600"
-GREY = "#555555"
+GREY = "#444444"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 35
+WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 15
 BASE_DIR = Path(__file__).resolve().parent
 TOMATO_IMG_DIR = BASE_DIR / "res" / "tomato.png"
 reps = 0
-flag = False
+is_active = False
+is_paused = False
 timer = None
+next_tick = None
+rem_ms = 0
+cnt = 0
 
 # ---------------------------- TIMER RESET ------------------------------- # 
 def reset_timer():
-    global reps, flag
+    global timer, reps, is_active, is_paused
 
     reps = 0
-    flag = False
+    is_active = False
+    is_paused = False
     title_label.config(text="Timer", fg=GREY)
     if timer is not None:
         window.after_cancel(timer)
+        timer = None
+        timer_controller.configure(text="Start", command=is_timer_running, fg=DARK_GREEN)
         canvas.itemconfig(timer_text, text="00:00")
         check_mark.config(text="")
 
+# ---------------------------- PAUSE MECHANISM ------------------------------- # 
+def pause_resume():
+    global is_paused, timer, rem_ms, next_tick
+
+    if not is_paused:
+        rem_ms = max(0, (next_tick - time.perf_counter()) * 1000)
+        window.after_cancel(timer)
+        is_paused = True
+        timer_controller.configure(text="Resume")
+    else:
+        next_tick = time.perf_counter() + rem_ms / 1000
+        timer = window.after(round(rem_ms), count_down, cnt - 1)
+        is_paused = False
+        timer_controller.configure(text="Pause")
+
 # ---------------------------- TIMER STATUS CHECK ------------------------------- #
 def is_timer_running():
-    global flag
+    global is_active
 
-    if not flag:
-        flag = True
+    if not is_active:
+        is_active = True
+        timer_controller.configure(text="Pause", command=pause_resume, fg=GREY)
         start_timer()
 
-# ---------------------------- TIMER MECHANISM ------------------------------- # 
+# ---------------------------- START MECHANISM ------------------------------- # 
 def start_timer():
-    global reps, flag
+    global reps
 
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
@@ -60,8 +84,9 @@ def start_timer():
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
 def count_down(count):
-    global timer
+    global timer, cnt, next_tick
 
+    cnt = count
     count_min = count // 60
     count_sec = count % 60
     if count_min < 10:
@@ -71,6 +96,7 @@ def count_down(count):
 
     canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
     if count > 0:
+        next_tick = time.perf_counter() + 1
         timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
@@ -87,6 +113,7 @@ tomato_img = PhotoImage(file=TOMATO_IMG_DIR)
 window.iconphoto(True, tomato_img)
 window.config(padx=100, pady=50, bg=YELLOW)
 
+
 title_label = Label(text="Timer", fg=GREY, bg=YELLOW, font=(FONT_NAME, 48))
 title_label.grid(column=1, row=0)
 
@@ -95,8 +122,8 @@ canvas.create_image(100, 112, image=tomato_img)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
 canvas.grid(column=1, row=1)
 
-start_button = Button(text="Start", command=is_timer_running, width=10, bg=YELLOW, fg=DARK_GREEN, highlightthickness=0)
-start_button.grid(column=0, row=2)
+timer_controller = Button(text="Start", command=is_timer_running, width=10, bg=YELLOW, fg=DARK_GREEN, highlightthickness=0)
+timer_controller.grid(column=0, row=2)
 
 reset_button = Button(text="Reset", command=reset_timer, width=10, bg=YELLOW, fg=DARK_RED, highlightthickness=0)
 reset_button.grid(column=2, row=2)
