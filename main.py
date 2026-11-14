@@ -17,7 +17,6 @@ SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 15
 BASE_DIR = Path(__file__).resolve().parent
 RES_DIR = BASE_DIR / "res"
-# TOMATO_IMG_DIR = RES_DIR / "tomato.png"
 reps = 0
 is_active = False
 is_paused = False
@@ -147,7 +146,6 @@ def count_down(count):
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
 window.title("Pomodoro")
-# tomato_img = PhotoImage(file=TOMATO_IMG_DIR)
 tomato_img = PhotoImage(file=RES_DIR / "tomato.png")
 window.iconphoto(True, tomato_img)
 window.config(padx=100, pady=50, bg=YELLOW)
